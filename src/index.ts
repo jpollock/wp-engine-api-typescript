@@ -1,6 +1,6 @@
 import { Configuration, ConfigurationParameters } from './generated/configuration';
 import { AccountApi, AccountUserApi, BackupApi, CacheApi, DomainApi, InstallApi, SiteApi, SshKeyApi, StatusApi, UserApi } from './generated/api';
-import { ConfigurationManager, WPEngineConfig } from './config';
+import { ConfigurationManager, WPEngineConfig, WPEngineCredentials } from './config';
 import axios from 'axios';
 
 export class WPEngineSDK {
@@ -19,9 +19,18 @@ export class WPEngineSDK {
   public readonly status: StatusApi;
   public readonly users: UserApi;
 
-  constructor(configPath?: string, profile: string = 'Default') {
-    const configManager = new ConfigurationManager(configPath);
-    this.config = configManager.getConfig(profile);
+  constructor(credentials?: WPEngineCredentials, configPath?: string, profile: string = 'Default') {
+    if (credentials) {
+      // Use provided credentials directly
+      this.config = {
+        credentials: credentials,
+        baseURL: 'https://api.wpengineapi.com/v1'
+      };
+    } else {
+      // Load from config file or environment variables
+      const configManager = new ConfigurationManager(configPath);
+      this.config = configManager.getConfig(profile);
+    }
 
     const params: ConfigurationParameters = {
       baseOptions: {
@@ -58,4 +67,4 @@ export class WPEngineSDK {
 
 // Export types from generated code
 export * from './generated/api';
-export { ConfigurationManager } from './config';
+export { ConfigurationManager, WPEngineCredentials } from './config';

@@ -23,174 +23,169 @@ npm install wpengine-typescript-sdk
 
 ## Usage
 
-### ES Modules (Recommended)
+There are several ways to initialize the SDK:
+
+### 1. Direct Credentials
 
 ```typescript
 import { WPEngineSDK } from 'wpengine-typescript-sdk';
 
-// Initialize the SDK with default credentials
-const sdk = new WPEngineSDK();
+const sdk = new WPEngineSDK({
+  username: 'your-api-username',
+  password: 'your-api-password'
+});
 ```
 
-### CommonJS
+### 2. Environment Variables
+
+Create a `.env` file:
+
+```ini
+WPENGINE_USERNAME=your-api-username
+WPENGINE_PASSWORD=your-api-password
+```
+
+Then initialize:
 
 ```typescript
-const { WPEngineSDK } = require('wpengine-typescript-sdk');
-
-// Initialize the SDK with default credentials
 const sdk = new WPEngineSDK();
 ```
 
-## Configuration
+### 3. Configuration File
 
-The SDK supports configuration through environment variables or a configuration file. Create a `.env` file in your project root:
+Create a configuration file (e.g., `config.ini`):
 
 ```ini
 [Default]
-WPENGINE_USERNAME=your-username
-WPENGINE_PASSWORD=your-password
+WPENGINE_USERNAME=your-api-username
+WPENGINE_PASSWORD=your-api-password
 
-[Staging]
-WPENGINE_USERNAME=staging-username
-WPENGINE_PASSWORD=staging-password
+[Production]
+WPENGINE_USERNAME=prod-api-username
+WPENGINE_PASSWORD=prod-api-password
 ```
 
-## Basic Usage
+Then initialize with a specific profile:
 
 ```typescript
-import { WPEngineSDK } from 'wpengine-typescript-sdk';
-
-// Initialize the SDK with default credentials
-const sdk = new WPEngineSDK();
-
-// Or specify a custom config file and profile
-const sdk = new WPEngineSDK('./config/wpengine.env', 'Staging');
-
-// Use the SDK
-async function main() {
-  try {
-    // Get current user
-    const user = await sdk.users.getCurrentUser();
-    console.log('Current user:', user.data);
-
-    // List accounts
-    const accounts = await sdk.accounts.listAccounts();
-    console.log('Accounts:', accounts.data);
-
-    // List sites for an account
-    const sites = await sdk.sites.listSites(undefined, undefined, undefined, 'account-id');
-    console.log('Sites:', sites.data);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
+const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
 ```
 
-## Available APIs
+## Security Best Practices
 
-The SDK provides access to all WP Engine API endpoints through dedicated clients:
+1. **Credential Storage**
+   - Never commit credentials to version control
+   - Use environment variables in production environments
+   - Ensure configuration files have appropriate permissions (0600)
 
-- `accounts` - Manage WP Engine accounts
-- `accountUsers` - Manage account users
-- `backups` - Manage site backups
-- `cache` - Control site caching
-- `domains` - Manage domain settings
-- `installs` - Manage WordPress installations
-- `sites` - Manage sites
-- `sshKeys` - Manage SSH keys
-- `status` - Check API status
-- `users` - Manage user information
+2. **Environment Variables**
+   - Use different credentials for different environments
+   - Rotate credentials regularly
+   - Use the principle of least privilege
+
+3. **Configuration Files**
+   - Store configuration files outside the project directory
+   - Use encrypted configuration when possible
+   - Regularly audit access to configuration files
+
+## API Usage Examples
+
+### User Management
+
+```typescript
+// List users in an account
+const users = await sdk.accountUsers.listAccountUsers('account-id');
+
+// Add a user to an account
+await sdk.accountUsers.createAccountUser('account-id', {
+  user: {
+    account_id: 'account-id',
+    first_name: 'John',
+    last_name: 'Doe',
+    email: 'john@example.com',
+    roles: 'full'
+  }
+});
+
+// Remove a user from an account
+await sdk.accountUsers.deleteAccountUser('account-id', 'user-id');
+```
+
+### Site Management
+
+```typescript
+// List sites
+const sites = await sdk.sites.listSites();
+
+// Get site details
+const site = await sdk.sites.getSite('site-id');
+```
+
+### Backup Management
+
+```typescript
+// List backups
+const backups = await sdk.backups.listBackups('install-id');
+
+// Create a backup
+await sdk.backups.createBackup('install-id', {
+  backup: {
+    description: 'Pre-deployment backup'
+  }
+});
+```
 
 ## Error Handling
 
-The SDK uses Axios for HTTP requests and provides detailed error information:
+The SDK uses standard Promise-based error handling:
 
 ```typescript
 try {
-  const sites = await sdk.sites.listSites();
+  const users = await sdk.accountUsers.listAccountUsers('account-id');
 } catch (error) {
   if (error.response) {
-    // The request was made and the server responded with a status code
-    // that falls out of the range of 2xx
-    console.error('Error status:', error.response.status);
-    console.error('Error data:', error.response.data);
+    // API error response
+    console.error('API Error:', error.response.data);
   } else if (error.request) {
-    // The request was made but no response was received
-    console.error('No response received:', error.request);
+    // Network error
+    console.error('Network Error:', error.message);
   } else {
-    // Something happened in setting up the request that triggered an Error
+    // Other error
     console.error('Error:', error.message);
   }
 }
 ```
 
-## Examples
-
-Check out the `examples` directory for more usage examples:
-
-- `basic-usage.ts` - Basic SDK usage examples
-- `site-management.ts` - Site management examples
-- `backup-management.ts` - Backup management examples
-
-### Running Examples
-
-```bash
-# First, run the setup script to configure your credentials
-npm run setup
-
-# Run examples using npm scripts
-npm run example:basic     # Run basic usage example
-npm run example:site      # Run site management example
-npm run example:backup    # Run backup management example
-```
-
 ## Development
 
-### Building the SDK
+### Building
 
 ```bash
 npm run build
 ```
 
-### Running Tests
+### Testing
 
 ```bash
 npm test
 ```
 
-### Publishing to npm
+### Running Examples
 
-To publish a new version to npm:
-
-1. Update the version in package.json:
 ```bash
-npm version patch  # for bug fixes
-npm version minor  # for new features
-npm version major  # for breaking changes
+npm run example:user
+npm run example:site
+npm run example:backup
 ```
-
-2. Build and publish:
-```bash
-npm run build
-npm publish
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
 MIT
 
-## Disclaimer
+## Contributing
 
-This SDK is not officially associated with WP Engine. It is a community-developed tool designed to work with WP Engine's public API. Use at your own discretion.
-
-## Support
-
-For support, please open an issue in the GitHub repository. Note that this is a community-supported project and is not officially supported by WP Engine.
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request

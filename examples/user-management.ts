@@ -215,8 +215,18 @@ async function removeUserFromMultipleAccounts(sdk: WPEngineSDK) {
 }
 
 async function main() {
-  // Initialize the SDK with default credentials from .env file
-  const sdk = new WPEngineSDK();
+  // Example of initializing the SDK with direct credentials
+  const sdk = new WPEngineSDK({
+    username: process.env.WPENGINE_USERNAME || '',
+    password: process.env.WPENGINE_PASSWORD || ''
+  });
+
+  // Alternative ways to initialize:
+  // 1. Using .env file in current directory:
+  // const sdk = new WPEngineSDK();
+  
+  // 2. Using specific config file and profile:
+  // const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
 
   try {
     console.log('Fetching available accounts...');
