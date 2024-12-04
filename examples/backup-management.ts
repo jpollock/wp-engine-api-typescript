@@ -14,7 +14,7 @@ async function waitForBackup(sdk: WPEngineSDK, installId: string, backupId: stri
     
     console.log(`Current status: ${status}`);
     
-    if (status === 'complete') {
+    if (status === 'completed') {
       console.log('Backup completed successfully!');
       break;
     } else if (status === 'failed') {

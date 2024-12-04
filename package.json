@@ -26,6 +26,7 @@
     "example:basic": "ts-node examples/basic-usage.ts",
     "example:site": "ts-node examples/site-management.ts",
     "example:backup": "ts-node examples/backup-management.ts",
+    "example:user": "ts-node examples/user-management.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "docs": "typedoc --out docs src/index.ts",
