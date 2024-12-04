@@ -1,6 +1,8 @@
-# WP Engine TypeScript SDK
+# WP Engine TypeScript SDK (Unofficial)
 
-A TypeScript SDK for interacting with the WP Engine API. This SDK provides a simple and type-safe way to interact with WP Engine's services from both Node.js and browser environments.
+An unofficial TypeScript SDK for interacting with the WP Engine API. This SDK provides a simple and type-safe way to interact with WP Engine's services from both Node.js and browser environments.
+
+> **Note**: This is an unofficial SDK and is not affiliated with or supported by WP Engine.
 
 ## Features
 
@@ -11,11 +13,32 @@ A TypeScript SDK for interacting with the WP Engine API. This SDK provides a sim
 - Comprehensive error handling
 - Example implementations
 - Unit and functional tests
+- Support for both CommonJS and ES Modules
 
 ## Installation
 
 ```bash
-npm install wp-engine-api-typescript
+npm install wpengine-typescript-sdk
+```
+
+## Usage
+
+### ES Modules (Recommended)
+
+```typescript
+import { WPEngineSDK } from 'wpengine-typescript-sdk';
+
+// Initialize the SDK with default credentials
+const sdk = new WPEngineSDK();
+```
+
+### CommonJS
+
+```typescript
+const { WPEngineSDK } = require('wpengine-typescript-sdk');
+
+// Initialize the SDK with default credentials
+const sdk = new WPEngineSDK();
 ```
 
 ## Configuration
@@ -35,7 +58,7 @@ WPENGINE_PASSWORD=staging-password
 ## Basic Usage
 
 ```typescript
-import { WPEngineSDK } from 'wp-engine-api-typescript';
+import { WPEngineSDK } from 'wpengine-typescript-sdk';
 
 // Initialize the SDK with default credentials
 const sdk = new WPEngineSDK();
@@ -135,6 +158,23 @@ npm run build
 npm test
 ```
 
+### Publishing to npm
+
+To publish a new version to npm:
+
+1. Update the version in package.json:
+```bash
+npm version patch  # for bug fixes
+npm version minor  # for new features
+npm version major  # for breaking changes
+```
+
+2. Build and publish:
+```bash
+npm run build
+npm publish
+```
+
 ## Contributing
 
 1. Fork the repository
@@ -147,6 +187,10 @@ npm test
 
 MIT
 
+## Disclaimer
+
+This SDK is not officially associated with WP Engine. It is a community-developed tool designed to work with WP Engine's public API. Use at your own discretion.
+
 ## Support
 
-For support, please open an issue in the GitHub repository or contact WP Engine support.
+For support, please open an issue in the GitHub repository. Note that this is a community-supported project and is not officially supported by WP Engine.
