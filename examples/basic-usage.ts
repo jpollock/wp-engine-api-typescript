@@ -1,55 +1,108 @@
 import { WPEngineSDK } from '../src';
 
 async function main() {
-  // Initialize the SDK with default credentials from .env file
+  // Initialize the SDK
   const sdk = new WPEngineSDK();
 
   try {
-    // Check API status
-    console.log('Checking API status...');
-    const status = await sdk.status.status();
-    console.log('API Status:', status.data);
+    // Example 1: Get Current User Information
+    console.log('\nFetching current user information...');
+    const currentUser = await sdk.users.getCurrentUser();
+    console.log('Current user:', {
+      id: currentUser.data.id,
+      email: currentUser.data.email,
+      name: `${currentUser.data.first_name} ${currentUser.data.last_name}`
+    });
 
-    // Get current user
-    console.log('\nGetting current user...');
-    const user = await sdk.users.getCurrentUser();
-    console.log('Current User:', user.data);
-
-    // List accounts
-    console.log('\nListing accounts...');
+    // Example 2: List Accounts
+    console.log('\nFetching accounts...');
     const accounts = await sdk.accounts.listAccounts();
-    console.log('Accounts:', accounts.data);
+    console.log('Available accounts:', accounts.data.results?.map(account => ({
+      id: account.id,
+      name: account.name
+    })));
 
-    // List sites for the first account
-    if (accounts.data.results && accounts.data.results.length > 0) {
+    // Example 3: Error Handling
+    console.log('\nDemonstrating error handling...');
+    try {
+      await sdk.installs.getInstall('invalid-id');
+    } catch (error: any) {
+      console.log('Handled error gracefully:', {
+        status: error.response?.status,
+        message: error.response?.data?.message || error.message
+      });
+    }
+
+    // Example 4: List Sites with Pagination
+    console.log('\nDemonstrating pagination...');
+    const firstPage = await sdk.installs.listInstalls(undefined, 5); // Get first 5 items
+    console.log('First page results:', firstPage.data.results?.map(site => ({
+      id: site.id,
+      name: site.name
+    })));
+
+    if (firstPage.data.next) {
+      const secondPage = await sdk.installs.listInstalls(undefined, 5, 5); // offset by 5
+      console.log('Second page results:', secondPage.data.results?.map(site => ({
+        id: site.id,
+        name: site.name
+      })));
+    }
+
+    // Example 5: Working with Sites
+    if (accounts.data.results?.[0]) {
       const accountId = accounts.data.results[0].id;
-      console.log(`\nListing sites for account ${accountId}...`);
-      const sites = await sdk.sites.listSites(undefined, undefined, undefined, accountId);
-      console.log('Sites:', sites.data);
+      console.log(`\nFetching sites for account ${accountId}...`);
+      
+      const sites = await sdk.installs.listInstalls(undefined, undefined, undefined, accountId);
+      console.log('Sites:', sites.data.results?.map(site => ({
+        id: site.id,
+        name: site.name,
+        environment: site.environment,
+        php_version: site.php_version
+      })));
 
-      // List installs for the account
-      console.log(`\nListing installs for account ${accountId}...`);
-      const installs = await sdk.installs.listInstalls(undefined, undefined, undefined, accountId);
-      console.log('Installs:', installs.data);
-
-      // If there are any installs, list their domains
-      if (installs.data.results && installs.data.results.length > 0) {
-        const installId = installs.data.results[0].id;
-        console.log(`\nListing domains for install ${installId}...`);
-        const domains = await sdk.domains.listDomains(installId);
-        console.log('Domains:', domains.data);
+      // If there's at least one site, get its domains
+      if (sites.data.results?.[0]) {
+        const siteId = sites.data.results[0].id;
+        console.log(`\nFetching domains for site ${siteId}...`);
+        
+        const domains = await sdk.domains.listDomains(siteId);
+        console.log('Domains:', domains.data.results?.map(domain => ({
+          id: domain.id,
+          name: domain.name,
+          primary: domain.primary
+        })));
       }
     }
 
-    // List SSH keys
-    console.log('\nListing SSH keys...');
+    // Example 6: Working with SSH Keys
+    console.log('\nFetching SSH keys...');
     const sshKeys = await sdk.sshKeys.listSshKeys();
-    console.log('SSH Keys:', sshKeys.data);
+    console.log('SSH Keys:', sshKeys.data.results?.map(key => ({
+      id: key.uuid,
+      fingerprint: key.fingerprint,
+      created_at: key.created_at
+    })));
+
+    // Example 7: Parallel Operations
+    console.log('\nDemonstrating parallel operations...');
+    const [accountsData, sitesData, userData] = await Promise.all([
+      sdk.accounts.listAccounts(),
+      sdk.installs.listInstalls(),
+      sdk.users.getCurrentUser()
+    ]);
+    
+    console.log('Parallel fetch results:', {
+      accountCount: accountsData.data.results?.length || 0,
+      siteCount: sitesData.data.results?.length || 0,
+      user: userData.data.email
+    });
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('An error occurred:', error);
   }
 }
 
-// Run the example
+// Run the examples
 main().catch(console.error);

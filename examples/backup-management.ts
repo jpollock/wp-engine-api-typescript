@@ -1,115 +1,102 @@
 import { WPEngineSDK } from '../src';
-import { CreateBackupRequest } from '../src/generated/api';
+import * as readline from 'readline';
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+const question = (query: string): Promise<string> => {
+  return new Promise((resolve) => {
+    rl.question(query, resolve);
+  });
+};
+
+async function showMenu(): Promise<string> {
+  console.log('\nBackup Management Options:');
+  console.log('1. Create new backup');
+  console.log('2. Check backup status');
+  console.log('3. Exit');
+  
+  return await question('\nSelect an option (1-3): ');
 }
 
-async function waitForBackup(sdk: WPEngineSDK, installId: string, backupId: string): Promise<void> {
-  console.log('Waiting for backup to complete...');
-  
-  while (true) {
-    const response = await sdk.backups.showBackup(installId, backupId);
-    const status = response.data.status;
+async function createBackup(sdk: WPEngineSDK) {
+  try {
+    const siteId = await question('Enter site ID: ');
+    const description = await question('Enter backup description: ');
+    const email = await question('Enter notification email: ');
     
-    console.log(`Current status: ${status}`);
+    const response = await sdk.backups.createBackup(siteId, {
+      description: description,
+      notification_emails: [email]
+    });
     
-    if (status === 'completed') {
-      console.log('Backup completed successfully!');
-      break;
-    } else if (status === 'failed') {
-      throw new Error('Backup failed');
-    }
+    console.log('\nBackup creation initiated!');
+    console.log(`Backup ID: ${response.data.id}`);
+    console.log(`Status: ${response.data.status}`);
+    console.log('\nNote: The backup process may take several minutes to complete.');
+    console.log('You will receive an email notification when the backup is ready.');
+  } catch (error) {
+    console.error('Error creating backup:', error);
+  }
+}
+
+async function checkBackupStatus(sdk: WPEngineSDK) {
+  try {
+    const siteId = await question('Enter site ID: ');
+    const backupId = await question('Enter backup ID: ');
     
-    // Wait 10 seconds before checking again
-    await sleep(10000);
+    const backup = await sdk.backups.showBackup(siteId, backupId);
+    
+    console.log('\nBackup Status:');
+    console.log(`ID: ${backup.data.id}`);
+    console.log(`Status: ${backup.data.status}`);
+  } catch (error) {
+    console.error('Error checking backup status:', error);
   }
 }
 
 async function main() {
-  // Initialize the SDK
   const sdk = new WPEngineSDK();
 
   try {
-    // First, get the list of installs
-    console.log('Fetching installs...');
-    const installsResponse = await sdk.installs.listInstalls();
-    if (!installsResponse.data.results?.length) {
-      throw new Error('No installs found');
-    }
-
-    // Get the first install for demonstration
-    const install = installsResponse.data.results[0];
-    if (!install.id) {
-      throw new Error('Install ID is missing');
-    }
-    console.log(`Using install: ${install.name} (${install.id})`);
-
-    // Create a backup request
-    console.log('\nInitiating backup...');
-    const backupRequest: CreateBackupRequest = {
-      description: `Automated backup created at ${new Date().toISOString()}`,
-      notification_emails: ['admin@example.com'] // Replace with actual email
-    };
-
-    // Create the backup
-    const backupResponse = await sdk.backups.createBackup(install.id, backupRequest);
-    if (!backupResponse.data.id) {
-      throw new Error('Backup ID is missing from response');
-    }
-    const backupId = backupResponse.data.id;
-    console.log(`Backup initiated with ID: ${backupId}`);
-
-    // Wait for backup to complete
-    await waitForBackup(sdk, install.id, backupId);
-
-    // Demonstrate error handling by trying to get a non-existent backup
-    console.log('\nDemonstrating error handling...');
-    try {
-      await sdk.backups.showBackup(install.id, 'non-existent-backup-id');
-    } catch (error: any) {
-      console.log('Expected error caught:', error.response?.data?.message || error.message);
-    }
-
-    // Demonstrate cache management
-    console.log('\nManaging cache...');
+    console.log('Fetching available sites...');
+    const sites = await sdk.installs.listInstalls();
     
-    // Purge object cache
-    console.log('Purging object cache...');
-    await sdk.cache.purgeCache(install.id, { type: 'object' });
-    console.log('Object cache purged');
-
-    // Wait a bit before purging page cache
-    await sleep(2000);
-
-    // Purge page cache
-    console.log('Purging page cache...');
-    await sdk.cache.purgeCache(install.id, { type: 'page' });
-    console.log('Page cache purged');
-
-    // Wait a bit before purging CDN cache
-    await sleep(2000);
-
-    // Purge CDN cache
-    console.log('Purging CDN cache...');
-    await sdk.cache.purgeCache(install.id, { type: 'cdn' });
-    console.log('CDN cache purged');
-
-    console.log('\nAll operations completed successfully!');
-
-  } catch (error: any) {
-    console.error('Error:', error.response?.data || error.message);
-    if (error.response?.data?.errors) {
-      console.error('Validation errors:', error.response.data.errors);
+    if (!sites.data.results || sites.data.results.length === 0) {
+      console.log('No sites found. Please check your credentials and permissions.');
+      return;
     }
-    process.exit(1);
+
+    console.log('\nAvailable sites:');
+    sites.data.results.forEach(site => {
+      console.log(`ID: ${site.id}, Name: ${site.name}`);
+    });
+
+    while (true) {
+      const choice = await showMenu();
+      
+      switch (choice) {
+        case '1':
+          await createBackup(sdk);
+          break;
+        case '2':
+          await checkBackupStatus(sdk);
+          break;
+        case '3':
+          console.log('Exiting...');
+          rl.close();
+          return;
+        default:
+          console.log('Invalid option. Please try again.');
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    rl.close();
   }
 }
 
-// Run the example
-if (require.main === module) {
-  main().catch(console.error);
-}
-
-// Export functions for testing
-export { waitForBackup };
+main().catch(console.error);

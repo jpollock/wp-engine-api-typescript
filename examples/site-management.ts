@@ -1,103 +1,142 @@
 import { WPEngineSDK } from '../src';
-import { CreateSiteRequest, CreateInstallRequest, CreateDomainRequest } from '../src/generated/api';
+import * as readline from 'readline';
 
-async function main() {
-  // Initialize the SDK
-  const sdk = new WPEngineSDK();
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
+const question = (query: string): Promise<string> => {
+  return new Promise((resolve) => {
+    rl.question(query, resolve);
+  });
+};
+
+async function showMenu(): Promise<string> {
+  console.log('\nSite Management Options:');
+  console.log('1. List all sites');
+  console.log('2. Get site details');
+  console.log('3. List site domains');
+  console.log('4. Add domain to site');
+  console.log('5. Remove domain from site');
+  console.log('6. Exit');
+  
+  return await question('\nSelect an option (1-6): ');
+}
+
+async function listSites(sdk: WPEngineSDK) {
   try {
-    // First, get the list of accounts
-    console.log('Fetching accounts...');
-    const accountsResponse = await sdk.accounts.listAccounts();
-    if (!accountsResponse.data.results?.length) {
-      throw new Error('No accounts found');
-    }
-
-    const accountId = accountsResponse.data.results[0].id;
-    console.log(`Using account: ${accountId}`);
-
-    // Create a new site
-    const siteName = `test-site-${Date.now()}`;
-    console.log(`\nCreating new site: ${siteName}`);
-    
-    const createSiteRequest: CreateSiteRequest = {
-      name: siteName,
-      account_id: accountId
-    };
-
-    const siteResponse = await sdk.sites.createSite(createSiteRequest);
-    const siteId = siteResponse.data.id;
-    console.log(`Site created with ID: ${siteId}`);
-
-    // Create a new install for the site
-    console.log('\nCreating new install...');
-    const createInstallRequest: CreateInstallRequest = {
-      name: siteName.toLowerCase().replace(/[^a-z0-9]/g, ''),
-      account_id: accountId,
-      site_id: siteId,
-      environment: 'production'
-    };
-
-    const installResponse = await sdk.installs.createInstall(createInstallRequest);
-    const installId = installResponse.data.id;
-    console.log(`Install created with ID: ${installId}`);
-
-    // Add domains to the install
-    console.log('\nAdding domains...');
-    const domains = [
-      `${siteName.toLowerCase()}.example.com`,
-      `www.${siteName.toLowerCase()}.example.com`
-    ];
-
-    // Add primary domain
-    const primaryDomainRequest: CreateDomainRequest = {
-      name: domains[0],
-      primary: true
-    };
-
-    const primaryDomainResponse = await sdk.domains.createDomain(installId, primaryDomainRequest);
-    console.log(`Primary domain added: ${primaryDomainResponse.data.name}`);
-
-    // Add redirect domain
-    const redirectDomainRequest: CreateDomainRequest = {
-      name: domains[1],
-      redirect_to: primaryDomainResponse.data.id
-    };
-
-    const redirectDomainResponse = await sdk.domains.createDomain(installId, redirectDomainRequest);
-    console.log(`Redirect domain added: ${redirectDomainResponse.data.name}`);
-
-    // List all domains for verification
-    console.log('\nVerifying domains...');
-    const domainsResponse = await sdk.domains.listDomains(installId);
-    console.log('Current domains:');
-    domainsResponse.data.results?.forEach(domain => {
-      console.log(`- ${domain.name} ${domain.primary ? '(primary)' : domain.redirects_to ? '(redirect)' : ''}`);
+    const sites = await sdk.installs.listInstalls();
+    console.log('\nAvailable sites:');
+    sites.data.results?.forEach(site => {
+      console.log(`\nName: ${site.name}`);
+      console.log(`ID: ${site.id}`);
+      console.log(`Environment: ${site.environment}`);
+      console.log(`Primary Domain: ${site.primary_domain}`);
+      console.log(`Status: ${site.status}`);
     });
-
-    // Demonstrate error handling
-    console.log('\nDemonstrating error handling...');
-    try {
-      await sdk.domains.createDomain(installId, {
-        name: 'invalid domain name',
-        primary: false
-      });
-    } catch (error: any) {
-      console.log('Expected error caught:', error.response?.data?.message || error.message);
-    }
-
-    // Clean up (optional - comment out to keep the test site)
-    console.log('\nCleaning up...');
-    await sdk.sites.deleteSite(siteId);
-    console.log('Site deleted successfully');
-
-  } catch (error: any) {
-    console.error('Error:', error.response?.data || error.message);
-    process.exit(1);
+  } catch (error) {
+    console.error('Error listing sites:', error);
   }
 }
 
-// Run the example
-if (require.main === module) {
-  main().catch(console.error);
+async function getSiteDetails(sdk: WPEngineSDK) {
+  try {
+    const siteId = await question('Enter site ID: ');
+    const site = await sdk.installs.getInstall(siteId);
+    
+    console.log('\nSite Details:');
+    console.log(`Name: ${site.data.name}`);
+    console.log(`ID: ${site.data.id}`);
+    console.log(`Environment: ${site.data.environment}`);
+    console.log(`Primary Domain: ${site.data.primary_domain}`);
+    console.log(`Status: ${site.data.status}`);
+    console.log(`PHP Version: ${site.data.php_version}`);
+  } catch (error) {
+    console.error('Error getting site details:', error);
+  }
 }
+
+async function listSiteDomains(sdk: WPEngineSDK) {
+  try {
+    const siteId = await question('Enter site ID: ');
+    const domains = await sdk.domains.listDomains(siteId);
+    
+    console.log('\nSite Domains:');
+    domains.data.results?.forEach(domain => {
+      console.log(`\nName: ${domain.name}`);
+      console.log(`Primary: ${domain.primary ? 'Yes' : 'No'}`);
+    });
+  } catch (error) {
+    console.error('Error listing domains:', error);
+  }
+}
+
+async function addDomain(sdk: WPEngineSDK) {
+  try {
+    const siteId = await question('Enter site ID: ');
+    const domainName = await question('Enter domain name: ');
+    const setPrimary = (await question('Set as primary domain? (yes/no): ')).toLowerCase() === 'yes';
+    
+    await sdk.domains.createDomain(siteId, {
+      name: domainName,
+      primary: setPrimary
+    });
+    
+    console.log('\nDomain added successfully!');
+  } catch (error) {
+    console.error('Error adding domain:', error);
+  }
+}
+
+async function removeDomain(sdk: WPEngineSDK) {
+  try {
+    const siteId = await question('Enter site ID: ');
+    const domainName = await question('Enter domain name to remove: ');
+    
+    await sdk.domains.deleteDomain(siteId, domainName);
+    console.log('\nDomain removed successfully!');
+  } catch (error) {
+    console.error('Error removing domain:', error);
+  }
+}
+
+async function main() {
+  const sdk = new WPEngineSDK();
+
+  try {
+    while (true) {
+      const choice = await showMenu();
+      
+      switch (choice) {
+        case '1':
+          await listSites(sdk);
+          break;
+        case '2':
+          await getSiteDetails(sdk);
+          break;
+        case '3':
+          await listSiteDomains(sdk);
+          break;
+        case '4':
+          await addDomain(sdk);
+          break;
+        case '5':
+          await removeDomain(sdk);
+          break;
+        case '6':
+          console.log('Exiting...');
+          rl.close();
+          return;
+        default:
+          console.log('Invalid option. Please try again.');
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    rl.close();
+  }
+}
+
+main().catch(console.error);
