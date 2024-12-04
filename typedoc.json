@@ -1,0 +1,61 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "WP Engine TypeScript SDK",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "excludeInternal": true,
+  "theme": "default",
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Configuration",
+    "Account Management",
+    "Site Management",
+    "Installation Management",
+    "Domain Management",
+    "Backup Management",
+    "Cache Management",
+    "SSH Key Management",
+    "User Management",
+    "*"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  },
+  "searchInComments": true,
+  "readme": "README.md",
+  "plugin": ["typedoc-plugin-markdown"],
+  "gitRevision": "main",
+  "compilerOptions": {
+    "skipLibCheck": true
+  },
+  "sort": [
+    "source-order",
+    "required-first",
+    "alphabetical"
+  ],
+  "validation": {
+    "invalidLink": true,
+    "notExported": true
+  },
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false
+  },
+  "treatWarningsAsErrors": false,
+  "treatValidationWarningsAsErrors": false,
+  "intentionallyNotExported": [
+    "BaseAPI",
+    "Configuration",
+    "ConfigurationParameters"
+  ],
+  "sidebarLinks": {
+    "API Reference": "https://developer.wpengine.com/",
+    "GitHub": "https://github.com/yourusername/wp-engine-api-typescript"
+  }
+}
