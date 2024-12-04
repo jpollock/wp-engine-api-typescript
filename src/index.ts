@@ -1,6 +1,8 @@
 import { Configuration, ConfigurationParameters } from './generated/configuration';
 import { AccountApi, AccountUserApi, BackupApi, CacheApi, DomainApi, InstallApi, SiteApi, SshKeyApi, StatusApi, UserApi } from './generated/api';
 import { ConfigurationManager, WPEngineConfig, WPEngineCredentials } from './config';
+import { ValidatedApiWrapper } from './validation/api-wrapper';
+import { validators } from './validation/validators';
 import axios from 'axios';
 
 export class WPEngineSDK {
@@ -21,6 +23,9 @@ export class WPEngineSDK {
 
   constructor(credentials?: WPEngineCredentials, configPath?: string, profile: string = 'Default') {
     if (credentials) {
+      // Validate provided credentials
+      validators.credentials(credentials.username, credentials.password);
+      
       // Use provided credentials directly
       this.config = {
         credentials: credentials,
@@ -30,6 +35,12 @@ export class WPEngineSDK {
       // Load from config file or environment variables
       const configManager = new ConfigurationManager(configPath);
       this.config = configManager.getConfig(profile);
+      
+      // Validate loaded credentials
+      validators.credentials(
+        this.config.credentials.username,
+        this.config.credentials.password
+      );
     }
 
     const params: ConfigurationParameters = {
@@ -44,27 +55,63 @@ export class WPEngineSDK {
 
     this.axiosConfig = new Configuration(params);
 
-    // Initialize API clients
+    // Initialize API clients with validation wrappers
     this.accounts = new AccountApi(this.axiosConfig);
-    this.accountUsers = new AccountUserApi(this.axiosConfig);
+    this.accountUsers = ValidatedApiWrapper.wrapAccountUserApi(
+      new AccountUserApi(this.axiosConfig)
+    );
     this.backups = new BackupApi(this.axiosConfig);
     this.cache = new CacheApi(this.axiosConfig);
-    this.domains = new DomainApi(this.axiosConfig);
-    this.installs = new InstallApi(this.axiosConfig);
-    this.sites = new SiteApi(this.axiosConfig);
+    this.domains = ValidatedApiWrapper.wrapDomainApi(
+      new DomainApi(this.axiosConfig)
+    );
+    this.installs = ValidatedApiWrapper.wrapInstallApi(
+      new InstallApi(this.axiosConfig)
+    );
+    this.sites = ValidatedApiWrapper.wrapSiteApi(
+      new SiteApi(this.axiosConfig)
+    );
     this.sshKeys = new SshKeyApi(this.axiosConfig);
     this.status = new StatusApi(this.axiosConfig);
     this.users = new UserApi(this.axiosConfig);
+
+    // Add request interceptor for additional validation
+    axios.interceptors.request.use((config) => {
+      // Validate URLs
+      if (config.url) {
+        validators.url(config.url);
+      }
+      return config;
+    });
+
+    // Add response interceptor for error handling
+    axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response) {
+          // Clean sensitive data from error responses
+          if (error.response.config?.auth) {
+            delete error.response.config.auth;
+          }
+          if (error.response.config?.headers?.Authorization) {
+            delete error.response.config.headers.Authorization;
+          }
+        }
+        throw error;
+      }
+    );
   }
 
   /**
    * Get the current configuration
    */
   public getConfig(): WPEngineConfig {
-    return this.config;
+    // Return a copy to prevent modification
+    return { ...this.config };
   }
 }
 
-// Export types from generated code
+// Export types and validation utilities
 export * from './generated/api';
 export { ConfigurationManager, WPEngineCredentials } from './config';
+export { ValidationError } from './validation/validators';

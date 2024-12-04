@@ -10,7 +10,8 @@ An unofficial TypeScript SDK for interacting with the WP Engine API. This SDK pr
 - Environment-based configuration
 - Support for all WP Engine API endpoints
 - Built-in authentication handling
-- Comprehensive error handling
+- Comprehensive input validation
+- Secure error handling
 - Example implementations
 - Unit and functional tests
 - Support for both CommonJS and ES Modules
@@ -71,6 +72,31 @@ Then initialize with a specific profile:
 const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
 ```
 
+## Input Validation
+
+The SDK includes comprehensive input validation to prevent errors and improve security:
+
+```typescript
+import { WPEngineSDK, ValidationError } from 'wpengine-typescript-sdk';
+
+try {
+  await sdk.accountUsers.createAccountUser('account-id', {
+    user: {
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@example.com',
+      roles: 'full'
+    }
+  });
+} catch (error) {
+  if (error instanceof ValidationError) {
+    console.log('Validation failed:', error.message);
+  }
+}
+```
+
+See [Validation Documentation](docs/validation.md) for detailed information about the validation system.
+
 ## Security Best Practices
 
 1. **Credential Storage**
@@ -83,10 +109,10 @@ const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
    - Rotate credentials regularly
    - Use the principle of least privilege
 
-3. **Configuration Files**
-   - Store configuration files outside the project directory
-   - Use encrypted configuration when possible
-   - Regularly audit access to configuration files
+3. **Input Validation**
+   - Always handle validation errors appropriately
+   - Validate user input before making API calls
+   - Use TypeScript types for additional type safety
 
 ## API Usage Examples
 
@@ -137,13 +163,16 @@ await sdk.backups.createBackup('install-id', {
 
 ## Error Handling
 
-The SDK uses standard Promise-based error handling:
+The SDK uses standard Promise-based error handling with additional validation:
 
 ```typescript
 try {
   const users = await sdk.accountUsers.listAccountUsers('account-id');
 } catch (error) {
-  if (error.response) {
+  if (error instanceof ValidationError) {
+    // Handle validation error
+    console.error('Validation Error:', error.message);
+  } else if (error.response) {
     // API error response
     console.error('API Error:', error.response.data);
   } else if (error.request) {
@@ -176,6 +205,7 @@ npm test
 npm run example:user
 npm run example:site
 npm run example:backup
+npm run example:validation
 ```
 
 ## License
