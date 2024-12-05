@@ -1,6 +1,5 @@
-import { describe, expect, test, beforeAll, afterAll } from '@jest/globals';
+import { describe, expect, test, beforeAll } from '@jest/globals';
 import { WPEngineSDK } from '../../src';
-import * as fs from 'fs';
 import * as path from 'path';
 
 describe('WPEngineSDK Functional Tests', () => {
@@ -8,23 +7,8 @@ describe('WPEngineSDK Functional Tests', () => {
   const testConfigPath = path.join(__dirname, 'test.env');
 
   beforeAll(() => {
-    // Create a test config file
-    const configContent = `
-[Default]
-WPENGINE_USERNAME=${process.env.WPENGINE_USERNAME || 'test-user'}
-WPENGINE_PASSWORD=${process.env.WPENGINE_PASSWORD || 'test-pass'}
-    `;
-    fs.writeFileSync(testConfigPath, configContent);
-
     // Initialize SDK with test config
-    sdk = new WPEngineSDK(testConfigPath);
-  });
-
-  afterAll(() => {
-    // Clean up test config file
-    if (fs.existsSync(testConfigPath)) {
-      fs.unlinkSync(testConfigPath);
-    }
+    sdk = new WPEngineSDK(undefined, '.env', 'Test', undefined);
   });
 
   test('SDK initialization', () => {
@@ -74,12 +58,11 @@ WPENGINE_PASSWORD=${process.env.WPENGINE_PASSWORD || 'test-pass'}
   });
 
   test('Error Handling - Invalid Credentials', async () => {
-    // Create SDK instance with invalid credentials
-    const invalidSdk = new WPEngineSDK();
-    invalidSdk['config'].credentials = {
+    // Create SDK instance with invalid credentials directly
+    const invalidSdk = new WPEngineSDK({
       username: 'invalid',
       password: 'invalid'
-    };
+    });
 
     await expect(async () => {
       await invalidSdk.accounts.listAccounts();
@@ -115,12 +98,12 @@ WPENGINE_PASSWORD=${process.env.WPENGINE_PASSWORD || 'test-pass'}
 
   test('Configuration Profile Selection', () => {
     // Test default profile
-    const defaultSdk = new WPEngineSDK(testConfigPath);
+    const defaultSdk = new WPEngineSDK(undefined, testConfigPath);
     expect(defaultSdk.getConfig()).toBeDefined();
 
     // Test non-existent profile
     expect(() => {
-      new WPEngineSDK(testConfigPath, 'NonExistent');
+      new WPEngineSDK(undefined, testConfigPath, 'NonExistent');
     }).toThrow();
   });
 
