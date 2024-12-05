@@ -3,11 +3,17 @@ import { AccountApi, AccountUserApi, BackupApi, CacheApi, DomainApi, InstallApi,
 import { ConfigurationManager, WPEngineConfig, WPEngineCredentials } from './config';
 import { ValidatedApiWrapper } from './validation/api-wrapper';
 import { validators } from './validation/validators';
-import axios from 'axios';
+import { RateLimiter, RateLimitError } from './rate-limiter';
+import axios, { AxiosError } from 'axios';
+
+export interface SDKOptions {
+  maxRequestsPerSecond?: number;
+}
 
 export class WPEngineSDK {
   private config: WPEngineConfig;
   private axiosConfig: Configuration;
+  private rateLimiter: RateLimiter;
 
   // API Clients
   public readonly accounts: AccountApi;
@@ -21,7 +27,15 @@ export class WPEngineSDK {
   public readonly status: StatusApi;
   public readonly users: UserApi;
 
-  constructor(credentials?: WPEngineCredentials, configPath?: string, profile: string = 'Default') {
+  constructor(
+    credentials?: WPEngineCredentials, 
+    configPath?: string, 
+    profile: string = 'Default',
+    options: SDKOptions = {}
+  ) {
+    // Initialize rate limiter
+    this.rateLimiter = new RateLimiter(options.maxRequestsPerSecond);
+
     if (credentials) {
       // Validate provided credentials
       validators.credentials(credentials.username, credentials.password);
@@ -75,8 +89,15 @@ export class WPEngineSDK {
     this.status = new StatusApi(this.axiosConfig);
     this.users = new UserApi(this.axiosConfig);
 
-    // Add request interceptor for additional validation
-    axios.interceptors.request.use((config) => {
+    // Add request interceptor for rate limiting and validation
+    axios.interceptors.request.use(async (config) => {
+      // Apply rate limiting
+      try {
+        await this.rateLimiter.acquireToken();
+      } catch (error) {
+        throw new RateLimitError('Rate limit exceeded');
+      }
+
       // Validate URLs
       if (config.url) {
         validators.url(config.url);
@@ -87,7 +108,7 @@ export class WPEngineSDK {
     // Add response interceptor for error handling
     axios.interceptors.response.use(
       (response) => response,
-      (error) => {
+      (error: AxiosError) => {
         if (error.response) {
           // Clean sensitive data from error responses
           if (error.response.config?.auth) {
@@ -109,9 +130,20 @@ export class WPEngineSDK {
     // Return a copy to prevent modification
     return { ...this.config };
   }
+
+  /**
+   * Get rate limiter statistics
+   */
+  public getRateLimiterStats() {
+    return {
+      availableTokens: this.rateLimiter.getAvailableTokens(),
+      waitTime: this.rateLimiter.getWaitTime()
+    };
+  }
 }
 
-// Export types and validation utilities
+// Export types and utilities
 export * from './generated/api';
 export { ConfigurationManager, WPEngineCredentials } from './config';
 export { ValidationError } from './validation/validators';
+export { RateLimitError } from './rate-limiter';

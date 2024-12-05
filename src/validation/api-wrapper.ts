@@ -51,12 +51,7 @@ export class ValidatedApiWrapper {
       return originalCreate(installId, requestBody);
     };
 
-    // Wrap listBackups
-    const originalList = wrapped.listBackups.bind(wrapped);
-    wrapped.listBackups = async (installId: string) => {
-      validators.installId(installId);
-      return originalList(installId);
-    };
+    // Note: Removed listBackups as it's not in the API spec
 
     return wrapped;
   }
