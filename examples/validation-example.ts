@@ -1,11 +1,11 @@
 import { WPEngineSDK, ValidationError } from '../src';
 
-async function demonstrateValidation() {
+async function demonstrateValidation(): Promise<void> {
   try {
     // Example 1: Invalid credentials
     console.log('\nTesting invalid credentials:');
     try {
-      const invalidSdk = new WPEngineSDK({
+      const _invalidSdk = new WPEngineSDK({
         username: '',  // Invalid: empty username
         password: 'test'
       });
@@ -53,10 +53,8 @@ async function demonstrateValidation() {
     console.log('\nTesting invalid backup description:');
     try {
       await sdk.backups.createBackup('valid-install-id', {
-        backup: {
-          description: 'a'.repeat(300),  // Invalid: too long
-          notification_emails: ['invalid-email']  // Invalid: bad email format
-        }
+        description: 'a'.repeat(300),  // Invalid: too long
+        notification_emails: ['invalid-email']  // Invalid: bad email format
       });
     } catch (error) {
       if (error instanceof ValidationError) {
@@ -68,10 +66,8 @@ async function demonstrateValidation() {
     console.log('\nTesting invalid domain input:');
     try {
       await sdk.domains.createDomain('valid-install-id', {
-        domain: {
-          name: 'invalid..domain',  // Invalid: bad domain format
-          primary: true
-        }
+        name: 'invalid..domain',  // Invalid: bad domain format
+        primary: true
       });
     } catch (error) {
       if (error instanceof ValidationError) {

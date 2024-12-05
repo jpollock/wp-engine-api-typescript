@@ -1,6 +1,6 @@
 import { WPEngineSDK, RateLimitError } from '../src';
 
-async function demonstrateRateLimiting() {
+async function demonstrateRateLimiting(): Promise<void> {
   // Initialize SDK with 5 requests per second limit
   const sdk = new WPEngineSDK(undefined, '.env', 'Default', {
     maxRequestsPerSecond: 1
@@ -9,7 +9,7 @@ async function demonstrateRateLimiting() {
   console.log('Demonstrating rate limiting...');
 
   // Function to make a sample API call
-  const makeApiCall = async (index: number) => {
+  const makeApiCall = async (index: number): Promise<void> => {
     try {
       const before = sdk.getRateLimiterStats();
       console.log(`Request ${index}: Available tokens before: ${before.availableTokens}`);

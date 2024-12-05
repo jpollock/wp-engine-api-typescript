@@ -18,12 +18,12 @@
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "examples",
-    "test"
+    "examples"
   ]
 }

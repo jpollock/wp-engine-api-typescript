@@ -11,6 +11,7 @@ An unofficial TypeScript SDK for interacting with the WP Engine API. This SDK pr
 - Support for all WP Engine API endpoints
 - Built-in authentication handling
 - Comprehensive input validation
+- Client-side rate limiting
 - Secure error handling
 - Example implementations
 - Unit and functional tests
@@ -26,7 +27,7 @@ npm install wpengine-typescript-sdk
 
 There are several ways to initialize the SDK:
 
-### 1. Direct Credentials
+### 1. Direct Credentials with Rate Limiting
 
 ```typescript
 import { WPEngineSDK } from 'wpengine-typescript-sdk';
@@ -34,6 +35,8 @@ import { WPEngineSDK } from 'wpengine-typescript-sdk';
 const sdk = new WPEngineSDK({
   username: 'your-api-username',
   password: 'your-api-password'
+}, undefined, 'Default', {
+  maxRequestsPerSecond: 5  // Optional: Default is 5
 });
 ```
 
@@ -72,6 +75,39 @@ Then initialize with a specific profile:
 const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
 ```
 
+## Rate Limiting
+
+The SDK includes built-in rate limiting to prevent API throttling:
+
+```typescript
+import { WPEngineSDK, RateLimitError } from 'wpengine-typescript-sdk';
+
+// Initialize with custom rate limit
+const sdk = new WPEngineSDK(credentials, undefined, 'Default', {
+  maxRequestsPerSecond: 5  // Limit to 5 requests per second
+});
+
+// Handle rate limit errors
+try {
+  await sdk.accounts.listAccounts();
+} catch (error) {
+  if (error instanceof RateLimitError) {
+    console.log('Rate limit exceeded, waiting...');
+  }
+}
+
+// Check rate limiter status
+const stats = sdk.getRateLimiterStats();
+console.log('Available requests:', stats.availableTokens);
+console.log('Wait time (ms):', stats.waitTime);
+```
+
+The rate limiter uses a token bucket algorithm to:
+- Allow burst traffic up to the limit
+- Smoothly handle sustained traffic
+- Automatically queue requests when limit is reached
+- Provide visibility into rate limit status
+
 ## Input Validation
 
 The SDK includes comprehensive input validation to prevent errors and improve security:
@@ -99,15 +135,15 @@ See [Validation Documentation](docs/validation.md) for detailed information abou
 
 ## Security Best Practices
 
-1. **Credential Storage**
+1. **Rate Limiting**
+   - Use appropriate rate limits for your use case
+   - Handle rate limit errors gracefully
+   - Monitor rate limit statistics
+
+2. **Credential Storage**
    - Never commit credentials to version control
    - Use environment variables in production environments
    - Ensure configuration files have appropriate permissions (0600)
-
-2. **Environment Variables**
-   - Use different credentials for different environments
-   - Rotate credentials regularly
-   - Use the principle of least privilege
 
 3. **Input Validation**
    - Always handle validation errors appropriately
@@ -163,7 +199,7 @@ await sdk.backups.createBackup('install-id', {
 
 ## Error Handling
 
-The SDK uses standard Promise-based error handling with additional validation:
+The SDK uses standard Promise-based error handling with additional error types:
 
 ```typescript
 try {
@@ -172,6 +208,9 @@ try {
   if (error instanceof ValidationError) {
     // Handle validation error
     console.error('Validation Error:', error.message);
+  } else if (error instanceof RateLimitError) {
+    // Handle rate limit error
+    console.error('Rate Limit Error:', error.message);
   } else if (error.response) {
     // API error response
     console.error('API Error:', error.response.data);
@@ -206,6 +245,7 @@ npm run example:user
 npm run example:site
 npm run example:backup
 npm run example:validation
+npm run example:rate-limit
 ```
 
 ## License

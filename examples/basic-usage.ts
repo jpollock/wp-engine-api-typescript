@@ -1,6 +1,6 @@
 import { WPEngineSDK } from '../src';
 
-async function main() {
+async function main(): Promise<void> {
   // Initialize the SDK
   const sdk = new WPEngineSDK();
 

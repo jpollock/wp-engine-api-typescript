@@ -6,11 +6,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-const question = (query: string): Promise<string> => {
-  return new Promise((resolve) => {
-    rl.question(query, resolve);
-  });
-};
+const question = (query: string): Promise<string> => new Promise((resolve) => rl.question(query, resolve));
 
 async function showMenu(): Promise<string> {
   console.log('\nBackup Management Options:');
@@ -21,14 +17,14 @@ async function showMenu(): Promise<string> {
   return await question('\nSelect an option (1-3): ');
 }
 
-async function createBackup(sdk: WPEngineSDK) {
+async function createBackup(sdk: WPEngineSDK): Promise<void> {
   try {
     const siteId = await question('Enter site ID: ');
     const description = await question('Enter backup description: ');
     const email = await question('Enter notification email: ');
     
     const response = await sdk.backups.createBackup(siteId, {
-      description: description,
+      description,
       notification_emails: [email]
     });
     
@@ -42,7 +38,7 @@ async function createBackup(sdk: WPEngineSDK) {
   }
 }
 
-async function checkBackupStatus(sdk: WPEngineSDK) {
+async function checkBackupStatus(sdk: WPEngineSDK): Promise<void> {
   try {
     const siteId = await question('Enter site ID: ');
     const backupId = await question('Enter backup ID: ');
@@ -57,41 +53,43 @@ async function checkBackupStatus(sdk: WPEngineSDK) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const sdk = new WPEngineSDK();
 
   try {
     console.log('Fetching available sites...');
     const sites = await sdk.installs.listInstalls();
+    let exit = false;
     
     if (!sites.data.results || sites.data.results.length === 0) {
       console.log('No sites found. Please check your credentials and permissions.');
-      return;
+      exit = true;
     }
 
     console.log('\nAvailable sites:');
-    sites.data.results.forEach(site => {
+    if (sites.data.results) {
+      sites.data.results.forEach(site => {
       console.log(`ID: ${site.id}, Name: ${site.name}`);
-    });
-
-    while (true) {
-      const choice = await showMenu();
-      
-      switch (choice) {
-        case '1':
-          await createBackup(sdk);
-          break;
-        case '2':
-          await checkBackupStatus(sdk);
-          break;
-        case '3':
-          console.log('Exiting...');
-          rl.close();
-          return;
-        default:
-          console.log('Invalid option. Please try again.');
-      }
+      });
     }
+    while (!exit) {
+    const choice = await showMenu();
+    
+    switch (choice) {
+      case '1':
+        await createBackup(sdk);
+        break;
+      case '2':
+        await checkBackupStatus(sdk);
+        break;
+      case '3':
+        console.log('Exiting...');
+        exit = true;
+        break;
+      default:
+        console.log('Invalid option. Please try again.');
+    }
+  }
   } catch (error) {
     console.error('Error:', error);
   } finally {

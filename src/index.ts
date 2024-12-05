@@ -42,7 +42,7 @@ export class WPEngineSDK {
       
       // Use provided credentials directly
       this.config = {
-        credentials: credentials,
+        credentials,
         baseURL: 'https://api.wpengineapi.com/v1'
       };
     } else {
@@ -134,7 +134,7 @@ export class WPEngineSDK {
   /**
    * Get rate limiter statistics
    */
-  public getRateLimiterStats() {
+  public getRateLimiterStats(): { availableTokens: number; waitTime: number } {
     return {
       availableTokens: this.rateLimiter.getAvailableTokens(),
       waitTime: this.rateLimiter.getWaitTime()

@@ -65,7 +65,7 @@ WPENGINE_API_URL=https://staging-api.wpengineapi.com/v1
 
   test('throws error for non-existent profile', () => {
     const config = new ConfigurationManager();
-    expect(() => config.getConfig('NonExistent')).toThrow("Configuration profile 'NonExistent' not found");
+    expect(() => config.getConfig('NonExistent')).toThrow('Configuration profile \'NonExistent\' not found');
   });
 
   test('lists all available profiles', () => {

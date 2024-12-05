@@ -7,11 +7,7 @@ const rl = readline.createInterface({
 });
 
 // Helper function to prompt for input
-const question = (query: string): Promise<string> => {
-  return new Promise((resolve) => {
-    rl.question(query, resolve);
-  });
-};
+const question = (query: string): Promise<string> => new Promise((resolve) => rl.question(query, resolve));
 
 // Helper function to display menu and get choice
 async function showMenu(): Promise<string> {
@@ -34,7 +30,7 @@ async function confirmAction(preview: string): Promise<boolean> {
   return confirm.toLowerCase() === 'yes';
 }
 
-async function listUsersAndRoles(sdk: WPEngineSDK, accountId: string) {
+async function listUsersAndRoles(sdk: WPEngineSDK, accountId: string): Promise<void> {
   try {
     const users = await sdk.accountUsers.listAccountUsers(accountId);
     console.log('\nUsers and their roles:');
@@ -56,7 +52,7 @@ async function listUsersAndRoles(sdk: WPEngineSDK, accountId: string) {
   }
 }
 
-async function addUserToAccount(sdk: WPEngineSDK, accountId: string) {
+async function addUserToAccount(sdk: WPEngineSDK, accountId: string): Promise<void> {
   try {
     const firstName = await question('Enter user first name: ');
     const lastName = await question('Enter user last name: ');
@@ -97,8 +93,8 @@ async function addUserToAccount(sdk: WPEngineSDK, accountId: string) {
           account_id: accountId,
           first_name: firstName,
           last_name: lastName,
-          email: email,
-          roles: roles,
+          email,
+          roles,
           install_ids: installIds.length > 0 ? installIds : undefined
         }
       });
@@ -109,7 +105,7 @@ async function addUserToAccount(sdk: WPEngineSDK, accountId: string) {
   }
 }
 
-async function removeUserFromAccount(sdk: WPEngineSDK, accountId: string) {
+async function removeUserFromAccount(sdk: WPEngineSDK, accountId: string): Promise<void> {
   try {
     const users = await sdk.accountUsers.listAccountUsers(accountId);
     console.log('\nCurrent users:');
@@ -133,7 +129,7 @@ async function removeUserFromAccount(sdk: WPEngineSDK, accountId: string) {
   }
 }
 
-async function addUserToMultipleAccounts(sdk: WPEngineSDK) {
+async function addUserToMultipleAccounts(sdk: WPEngineSDK): Promise<void> {
   try {
     const accounts = await sdk.accounts.listAccounts();
     console.log('\nAvailable accounts:');
@@ -168,8 +164,8 @@ async function addUserToMultipleAccounts(sdk: WPEngineSDK) {
             account_id: accountId,
             first_name: firstName,
             last_name: lastName,
-            email: email,
-            roles: roles
+            email,
+            roles
           }
         });
         console.log(`User added to account ${accountId}`);
@@ -181,7 +177,7 @@ async function addUserToMultipleAccounts(sdk: WPEngineSDK) {
   }
 }
 
-async function removeUserFromMultipleAccounts(sdk: WPEngineSDK) {
+async function removeUserFromMultipleAccounts(sdk: WPEngineSDK): Promise<void> {
   try {
     const accounts = await sdk.accounts.listAccounts();
     console.log('\nAvailable accounts:');
@@ -214,7 +210,7 @@ async function removeUserFromMultipleAccounts(sdk: WPEngineSDK) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   // Example of initializing the SDK with direct credentials
   const sdk = new WPEngineSDK({
     username: process.env.WPENGINE_USERNAME || '',
@@ -228,23 +224,23 @@ async function main() {
   // 2. Using specific config file and profile:
   // const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
 
+  let continueLoop = true;
   try {
     console.log('Fetching available accounts...');
     const accounts = await sdk.accounts.listAccounts();
     
     if (!accounts.data.results || accounts.data.results.length === 0) {
       console.log('No accounts found. Please check your credentials and permissions.');
-      return;
+      continueLoop = false;
     }
 
     console.log('\nAvailable accounts:');
-    accounts.data.results.forEach(account => {
+    accounts.data.results?.forEach(account => {
       console.log(`ID: ${account.id}, Name: ${account.name}`);
     });
 
     const accountId = await question('\nEnter the account ID to work with: ');
-
-    while (true) {
+    while (continueLoop) {
       const choice = await showMenu();
       
       switch (choice) {

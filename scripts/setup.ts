@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
 import axios from 'axios';
+import * as winston from 'winston';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -32,17 +33,18 @@ async function validateCredentials(username: string, password: string): Promise<
     return false;
   }
 }
-
-async function main() {
-  console.log('WP Engine API TypeScript SDK Setup\n');
-  console.log('This script will help you set up your WP Engine API credentials.\n');
+  async function main(): Promise<void> {
+    winston.info('WP Engine API TypeScript SDK Setup\n');
+    winston.info('WP Engine API TypeScript SDK Setup\n');
+    winston.info('This script will help you set up your WP Engine API credentials.\n');
+    winston.info('This script will help you set up your WP Engine API credentials.\n');
 
   try {
     // Get credentials
     const username = await question('Enter your WP Engine API username: ');
     const password = await question('Enter your WP Engine API password: ');
 
-    console.log('\nValidating credentials...');
+    winston.info('\nValidating credentials...');
     const isValid = await validateCredentials(username, password);
 
     if (!isValid) {
@@ -50,11 +52,11 @@ async function main() {
       process.exit(1);
     }
 
-    console.log('Credentials validated successfully!\n');
+    winston.info('Credentials validated successfully!\n');
 
     // Get environment names
-    console.log('You can set up multiple environments (e.g., Default, Staging, Production)');
-    console.log('Press Enter without a name to finish adding environments.\n');
+    winston.info('You can set up multiple environments (e.g., Default, Staging, Production)');
+    winston.info('Press Enter without a name to finish adding environments.\n');
 
     const environments: { name: string; username: string; password: string }[] = [];
     let envName: string;
@@ -79,7 +81,7 @@ async function main() {
           const envUsername = await question('Enter username for this environment: ');
           const envPassword = await question('Enter password for this environment: ');
           
-          console.log('\nValidating environment credentials...');
+          winston.info('\nValidating environment credentials...');
           const isEnvValid = await validateCredentials(envUsername, envPassword);
 
           if (!isEnvValid) {
@@ -108,25 +110,25 @@ async function main() {
 
     fs.writeFileSync(configPath, configContent);
 
-    console.log('\nConfiguration file created successfully!');
-    console.log(`Location: ${configPath}`);
-    console.log('\nMake sure to add .env to your .gitignore file to keep your credentials secure.');
+    winston.info('\nConfiguration file created successfully!');
+    winston.info(`Location: ${configPath}`);
+    winston.info('\nMake sure to add .env to your .gitignore file to keep your credentials secure.');
 
     // Create .gitignore if it doesn't exist
     const gitignorePath = path.join(process.cwd(), '.gitignore');
     if (!fs.existsSync(gitignorePath)) {
       fs.writeFileSync(gitignorePath, '.env\n');
-      console.log('.gitignore file created with .env entry.');
+      winston.info('.gitignore file created with .env entry.');
     } else {
       const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
       if (!gitignoreContent.includes('.env')) {
         fs.appendFileSync(gitignorePath, '\n.env\n');
-        console.log('.env entry added to existing .gitignore file.');
+        winston.info('.env entry added to existing .gitignore file.');
       }
     }
 
-    console.log('\nSetup complete! You can now use the WP Engine TypeScript SDK.');
-    console.log('See the README.md file for usage examples.');
+    winston.info('\nSetup complete! You can now use the WP Engine TypeScript SDK.');
+    winston.info('See the README.md file for usage examples.');
 
   } catch (error) {
     console.error('An error occurred during setup:', error);

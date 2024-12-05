@@ -6,11 +6,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-const question = (query: string): Promise<string> => {
-  return new Promise((resolve) => {
-    rl.question(query, resolve);
-  });
-};
+const question = (query: string): Promise<string> => new Promise((resolve) => rl.question(query, resolve));
 
 async function showMenu(): Promise<string> {
   console.log('\nSite Management Options:');
@@ -24,7 +20,7 @@ async function showMenu(): Promise<string> {
   return await question('\nSelect an option (1-6): ');
 }
 
-async function listSites(sdk: WPEngineSDK) {
+async function listSites(sdk: WPEngineSDK): Promise<void> {
   try {
     const sites = await sdk.installs.listInstalls();
     console.log('\nAvailable sites:');
@@ -40,7 +36,7 @@ async function listSites(sdk: WPEngineSDK) {
   }
 }
 
-async function getSiteDetails(sdk: WPEngineSDK) {
+async function getSiteDetails(sdk: WPEngineSDK): Promise<void> {
   try {
     const siteId = await question('Enter site ID: ');
     const site = await sdk.installs.getInstall(siteId);
@@ -57,7 +53,7 @@ async function getSiteDetails(sdk: WPEngineSDK) {
   }
 }
 
-async function listSiteDomains(sdk: WPEngineSDK) {
+async function listSiteDomains(sdk: WPEngineSDK): Promise<void> {
   try {
     const siteId = await question('Enter site ID: ');
     const domains = await sdk.domains.listDomains(siteId);
@@ -72,7 +68,7 @@ async function listSiteDomains(sdk: WPEngineSDK) {
   }
 }
 
-async function addDomain(sdk: WPEngineSDK) {
+async function addDomain(sdk: WPEngineSDK): Promise<void> {
   try {
     const siteId = await question('Enter site ID: ');
     const domainName = await question('Enter domain name: ');
@@ -89,7 +85,7 @@ async function addDomain(sdk: WPEngineSDK) {
   }
 }
 
-async function removeDomain(sdk: WPEngineSDK) {
+async function removeDomain(sdk: WPEngineSDK): Promise<void> {
   try {
     const siteId = await question('Enter site ID: ');
     const domainName = await question('Enter domain name to remove: ');
@@ -101,11 +97,12 @@ async function removeDomain(sdk: WPEngineSDK) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const sdk = new WPEngineSDK();
 
   try {
-    while (true) {
+    let exit = false;
+    while (!exit) {
       const choice = await showMenu();
       
       switch (choice) {
@@ -125,8 +122,8 @@ async function main() {
           await removeDomain(sdk);
           break;
         case '6':
-          console.log('Exiting...');
-          rl.close();
+          exit = true;
+          break;
           return;
         default:
           console.log('Invalid option. Please try again.');

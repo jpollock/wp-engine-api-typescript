@@ -10,11 +10,6 @@
     "jest": true,
     "es6": true
   },
-  "parserOptions": {
-    "ecmaVersion": 2020,
-    "sourceType": "module",
-    "project": "./tsconfig.json"
-  },
   "rules": {
     "@typescript-eslint/explicit-function-return-type": ["warn", {
       "allowExpressions": true,
@@ -45,13 +40,25 @@
   },
   "overrides": [
     {
-      "files": ["examples/**/*.ts", "scripts/**/*.ts"],
+      "files": ["src/**/*.ts"],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      }
+    },
+    {
+      "files": ["examples/**/*.ts"],
+      "parserOptions": {
+        "project": "./tsconfig.examples.json"
+      },
       "rules": {
         "no-console": "off"
       }
     },
     {
       "files": ["test/**/*.ts"],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      },
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/explicit-function-return-type": "off"

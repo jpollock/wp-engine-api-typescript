@@ -23,10 +23,11 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "setup": "ts-node scripts/setup.ts",
-    "example:basic": "ts-node examples/basic-usage.ts",
-    "example:site": "ts-node examples/site-management.ts",
-    "example:backup": "ts-node examples/backup-management.ts",
-    "example:user": "ts-node examples/user-management.ts",
+    "example:user": "ts-node -P tsconfig.examples.json examples/user-management.ts",
+    "example:validation": "ts-node -P tsconfig.examples.json examples/validation-example.ts",
+    "example:ratelimit": "ts-node -P tsconfig.examples.json examples/rate-limit-example.ts",
+    "example:site": "ts-node -P tsconfig.examples.json examples/site-management.ts",
+    "example:backup": "ts-node -P tsconfig.examples.json examples/backup-management.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "docs": "typedoc --out docs src/index.ts",
@@ -46,7 +47,8 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.2",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.7.0",
