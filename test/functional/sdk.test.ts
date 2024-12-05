@@ -1,10 +1,8 @@
 import { describe, expect, test, beforeAll } from '@jest/globals';
 import { WPEngineSDK } from '../../src';
-import * as path from 'path';
 
 describe('WPEngineSDK Functional Tests', () => {
   let sdk: WPEngineSDK;
-  const testConfigPath = path.join(__dirname, 'test.env');
 
   beforeAll(() => {
     // Initialize SDK with test config
@@ -98,12 +96,12 @@ describe('WPEngineSDK Functional Tests', () => {
 
   test('Configuration Profile Selection', () => {
     // Test default profile
-    const defaultSdk = new WPEngineSDK(undefined, testConfigPath);
+    const defaultSdk = new WPEngineSDK(undefined, '.env', 'Test');
     expect(defaultSdk.getConfig()).toBeDefined();
 
     // Test non-existent profile
     expect(() => {
-      new WPEngineSDK(undefined, testConfigPath, 'NonExistent');
+      new WPEngineSDK(undefined, '.env', 'TestFoo');
     }).toThrow();
   });
 

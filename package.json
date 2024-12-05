@@ -1,6 +1,6 @@
 {
   "name": "wpengine-typescript-sdk",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Unofficial TypeScript SDK for the WP Engine API",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -40,8 +40,7 @@
     "wordpress",
     "api",
     "sdk",
-    "typescript",
-    "unofficial"
+    "typescript"
   ],
   "author": "",
   "license": "MIT",
