@@ -2,7 +2,7 @@
 
 An unofficial TypeScript SDK for interacting with the WP Engine API. This SDK provides a simple and type-safe way to interact with WP Engine's services from both Node.js and browser environments.
 
-> **Note**: This is an unofficial SDK and is not affiliated with or supported by WP Engine.
+> **Note**: This is an unofficial SDK maintained by Jeremy Pollock (jeremy.pollock@wpengine.com) and is not affiliated with or supported by WP Engine.
 
 ## Features
 
@@ -259,3 +259,7 @@ MIT
 3. Commit your changes
 4. Push to the branch
 5. Create a new Pull Request
+
+## Maintainer
+
+This SDK is maintained by Jeremy Pollock (jeremy.pollock@wpengine.com). For any questions, issues, or contributions, please reach out directly.
