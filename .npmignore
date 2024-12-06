@@ -1,0 +1,18 @@
+test/
+examples/
+scripts/
+docs/
+.env*
+.eslintrc.json
+.gitignore
+jest.config.js
+tsconfig*.json
+typedoc.json
+openapitools.json
+swagger.json
+*.log
+coverage/
+.vscode/
+
+# Include src/generated
+!src/generated/

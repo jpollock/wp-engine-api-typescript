@@ -1,5 +1,5 @@
 {
-  "name": "wpengine-typescript-sdk",
+  "name": "@elasticapi/wpengine-typescript-sdk",
   "version": "0.0.1",
   "description": "Unofficial TypeScript SDK for the WP Engine API",
   "main": "./dist/index.js",
@@ -12,6 +12,9 @@
       "types": "./dist/types/index.d.ts"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },  
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc",
