@@ -57,7 +57,7 @@
     {
       "files": ["test/**/*.ts"],
       "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.test.json"
       },
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",

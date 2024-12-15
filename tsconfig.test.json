@@ -2,11 +2,9 @@
   "compilerOptions": {
     "target": "es2018",
     "module": "commonjs",
-    "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "./dist/examples",
+    "rootDir": ".",
     "strict": true,
     "moduleResolution": "node",
     "baseUrl": "./",
@@ -18,12 +16,11 @@
     }
   },
   "include": [
+    "test/**/*",
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "examples",
-    "test"
+    "dist"
   ]
 }

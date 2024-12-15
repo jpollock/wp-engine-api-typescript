@@ -20,7 +20,7 @@ An unofficial TypeScript SDK for interacting with the WP Engine API. This SDK pr
 ## Installation
 
 ```bash
-npm install wpengine-typescript-sdk
+npm install @elasticapi/wpengine-typescript-sdk
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ There are several ways to initialize the SDK:
 ### 1. Direct Credentials with Rate Limiting
 
 ```typescript
-import { WPEngineSDK } from 'wpengine-typescript-sdk';
+import { WPEngineSDK } from '@elasticapi/wpengine-typescript-sdk';
 
 const sdk = new WPEngineSDK({
   username: 'your-api-username',
@@ -80,7 +80,7 @@ const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
 The SDK includes built-in rate limiting to prevent API throttling:
 
 ```typescript
-import { WPEngineSDK, RateLimitError } from 'wpengine-typescript-sdk';
+import { WPEngineSDK, RateLimitError } from '@elasticapi/wpengine-typescript-sdk';
 
 // Initialize with custom rate limit
 const sdk = new WPEngineSDK(credentials, undefined, 'Default', {
@@ -113,7 +113,7 @@ The rate limiter uses a token bucket algorithm to:
 The SDK includes comprehensive input validation to prevent errors and improve security:
 
 ```typescript
-import { WPEngineSDK, ValidationError } from 'wpengine-typescript-sdk';
+import { WPEngineSDK, ValidationError } from '@elasticapi/wpengine-typescript-sdk';
 
 try {
   await sdk.accountUsers.createAccountUser('account-id', {
