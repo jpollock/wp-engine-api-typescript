@@ -1,3 +1,23 @@
+/**
+ * Rate Limiting Example
+ * 
+ * This example demonstrates the rate limiting capabilities of the WP Engine TypeScript SDK.
+ * 
+ * To run this example as a package user:
+ * 1. Install the package: npm install @elasticapi/wpengine-typescript-sdk
+ * 2. Create a new file with this content
+ * 3. Update the import to use '@elasticapi/wpengine-typescript-sdk'
+ * 
+ * To run this example during local development:
+ * 1. Clone the repository
+ * 2. Run: npm install
+ * 3. Run: npm run example:ratelimit
+ */
+
+// For package users:
+// import { WPEngineSDK, RateLimitError } from '@elasticapi/wpengine-typescript-sdk';
+
+// For local development:
 import { WPEngineSDK, RateLimitError } from '../src';
 
 async function demonstrateRateLimiting(): Promise<void> {
@@ -57,41 +77,3 @@ async function demonstrateRateLimiting(): Promise<void> {
 // Run the rate limiting example
 console.log('Running rate limiting examples...');
 demonstrateRateLimiting().catch(console.error);
-
-/*
-Expected output:
-
-Running rate limiting examples...
-Demonstrating rate limiting...
-
-Testing burst of requests...
-Request 1: Available tokens before: 5
-Request 2: Available tokens before: 4
-Request 3: Available tokens before: 3
-Request 4: Available tokens before: 2
-Request 5: Available tokens before: 1
-Request 6: Rate limit exceeded. Waiting...
-Request 7: Rate limit exceeded. Waiting...
-Request 8: Rate limit exceeded. Waiting...
-Request 9: Rate limit exceeded. Waiting...
-Request 10: Rate limit exceeded. Waiting...
-Request 1: Completed in 150ms. Available tokens after: 0
-Request 2: Completed in 155ms. Available tokens after: 0
-Request 3: Completed in 160ms. Available tokens after: 0
-Request 4: Completed in 165ms. Available tokens after: 0
-Request 5: Completed in 170ms. Available tokens after: 0
-
-Testing sustained request rate...
-Request 1: Available tokens before: 1
-Request 1: Completed in 150ms. Available tokens after: 0
-Request 2: Rate limit exceeded. Waiting...
-Request 2: Completed in 350ms. Available tokens after: 0
-...
-
-Rate Limiter Stats:
-Available tokens: 0
-Wait time for next token (ms): 200
-
-Waiting for rate limit recovery...
-Available tokens after recovery: 5
-*/

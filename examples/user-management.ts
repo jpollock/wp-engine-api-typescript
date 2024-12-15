@@ -1,3 +1,30 @@
+/**
+ * User Management Example
+ * 
+ * This example provides an interactive CLI tool for managing WP Engine users across accounts.
+ * It demonstrates advanced SDK usage including user listing, adding/removing users,
+ * and managing users across multiple accounts.
+ * 
+ * To run this example as a package user:
+ * 1. Install the package: npm install @elasticapi/wpengine-typescript-sdk
+ * 2. Create a new file with this content
+ * 3. Update the import to use '@elasticapi/wpengine-typescript-sdk'
+ * 4. Create a .env file with your credentials:
+ *    WPENGINE_USERNAME=your-username
+ *    WPENGINE_PASSWORD=your-password
+ * 5. Run with: npx ts-node your-file.ts
+ * 
+ * To run this example during local development:
+ * 1. Clone the repository
+ * 2. Run: npm install
+ * 3. Set up your .env file with credentials
+ * 4. Run: npm run example:user
+ */
+
+// For package users:
+// import { WPEngineSDK } from '@elasticapi/wpengine-typescript-sdk';
+
+// For local development:
 import { WPEngineSDK } from '../src';
 import * as readline from 'readline';
 
@@ -211,18 +238,8 @@ async function removeUserFromMultipleAccounts(sdk: WPEngineSDK): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  // Example of initializing the SDK with direct credentials
-  const sdk = new WPEngineSDK({
-    username: process.env.WPENGINE_USERNAME || '',
-    password: process.env.WPENGINE_PASSWORD || ''
-  });
-
-  // Alternative ways to initialize:
-  // 1. Using .env file in current directory:
-  // const sdk = new WPEngineSDK();
-  
-  // 2. Using specific config file and profile:
-  // const sdk = new WPEngineSDK(undefined, './config.ini', 'Production');
+  // Initialize the SDK using environment variables
+  const sdk = new WPEngineSDK();
 
   let continueLoop = true;
   try {

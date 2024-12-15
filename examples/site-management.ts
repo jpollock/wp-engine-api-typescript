@@ -1,3 +1,30 @@
+/**
+ * Site Management Example
+ * 
+ * This example provides an interactive CLI tool for managing WP Engine sites and domains.
+ * It demonstrates core SDK functionality including listing sites, managing domains,
+ * and retrieving site details.
+ * 
+ * To run this example as a package user:
+ * 1. Install the package: npm install @elasticapi/wpengine-typescript-sdk
+ * 2. Create a new file with this content
+ * 3. Update the import to use '@elasticapi/wpengine-typescript-sdk'
+ * 4. Create a .env file with your credentials:
+ *    WPENGINE_USERNAME=your-username
+ *    WPENGINE_PASSWORD=your-password
+ * 5. Run with: npx ts-node your-file.ts
+ * 
+ * To run this example during local development:
+ * 1. Clone the repository
+ * 2. Run: npm install
+ * 3. Set up your .env file with credentials
+ * 4. Run: npm run example:site
+ */
+
+// For package users:
+// import { WPEngineSDK } from '@elasticapi/wpengine-typescript-sdk';
+
+// For local development:
 import { WPEngineSDK } from '../src';
 import * as readline from 'readline';
 
@@ -98,6 +125,7 @@ async function removeDomain(sdk: WPEngineSDK): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  // Initialize the SDK using environment variables
   const sdk = new WPEngineSDK();
 
   try {
@@ -123,8 +151,8 @@ async function main(): Promise<void> {
           break;
         case '6':
           exit = true;
+          console.log('Exiting...');
           break;
-          return;
         default:
           console.log('Invalid option. Please try again.');
       }
@@ -136,4 +164,5 @@ async function main(): Promise<void> {
   }
 }
 
+// Run the example
 main().catch(console.error);

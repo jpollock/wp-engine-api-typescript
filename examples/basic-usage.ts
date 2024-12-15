@@ -1,3 +1,28 @@
+/**
+ * Basic Usage Example
+ * 
+ * This example demonstrates the core functionality of the WP Engine TypeScript SDK,
+ * including authentication, error handling, pagination, and common API operations.
+ * 
+ * To run this example as a package user:
+ * 1. Install the package: npm install @elasticapi/wpengine-typescript-sdk
+ * 2. Create a new file with this content
+ * 3. Update the import to use '@elasticapi/wpengine-typescript-sdk'
+ * 4. Create a .env file with your credentials:
+ *    WPENGINE_USERNAME=your-username
+ *    WPENGINE_PASSWORD=your-password
+ * 
+ * To run this example during local development:
+ * 1. Clone the repository
+ * 2. Run: npm install
+ * 3. Set up your .env file with credentials
+ * 4. Run: npm run example:basic
+ */
+
+// For package users:
+// import { WPEngineSDK } from '@elasticapi/wpengine-typescript-sdk';
+
+// For local development:
 import { WPEngineSDK } from '../src';
 
 async function main(): Promise<void> {

@@ -1,3 +1,29 @@
+/**
+ * Backup Management Example
+ * 
+ * This example provides an interactive CLI tool for managing WP Engine site backups.
+ * It demonstrates how to create backups and monitor their status using the SDK.
+ * 
+ * To run this example as a package user:
+ * 1. Install the package: npm install @elasticapi/wpengine-typescript-sdk
+ * 2. Create a new file with this content
+ * 3. Update the import to use '@elasticapi/wpengine-typescript-sdk'
+ * 4. Create a .env file with your credentials:
+ *    WPENGINE_USERNAME=your-username
+ *    WPENGINE_PASSWORD=your-password
+ * 5. Run with: npx ts-node your-file.ts
+ * 
+ * To run this example during local development:
+ * 1. Clone the repository
+ * 2. Run: npm install
+ * 3. Set up your .env file with credentials
+ * 4. Run: npm run example:backup
+ */
+
+// For package users:
+// import { WPEngineSDK } from '@elasticapi/wpengine-typescript-sdk';
+
+// For local development:
 import { WPEngineSDK } from '../src';
 import * as readline from 'readline';
 
@@ -54,6 +80,7 @@ async function checkBackupStatus(sdk: WPEngineSDK): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  // Initialize the SDK using environment variables
   const sdk = new WPEngineSDK();
 
   try {
@@ -69,27 +96,28 @@ async function main(): Promise<void> {
     console.log('\nAvailable sites:');
     if (sites.data.results) {
       sites.data.results.forEach(site => {
-      console.log(`ID: ${site.id}, Name: ${site.name}`);
+        console.log(`ID: ${site.id}, Name: ${site.name}`);
       });
     }
+
     while (!exit) {
-    const choice = await showMenu();
-    
-    switch (choice) {
-      case '1':
-        await createBackup(sdk);
-        break;
-      case '2':
-        await checkBackupStatus(sdk);
-        break;
-      case '3':
-        console.log('Exiting...');
-        exit = true;
-        break;
-      default:
-        console.log('Invalid option. Please try again.');
+      const choice = await showMenu();
+      
+      switch (choice) {
+        case '1':
+          await createBackup(sdk);
+          break;
+        case '2':
+          await checkBackupStatus(sdk);
+          break;
+        case '3':
+          console.log('Exiting...');
+          exit = true;
+          break;
+        default:
+          console.log('Invalid option. Please try again.');
+      }
     }
-  }
   } catch (error) {
     console.error('Error:', error);
   } finally {
@@ -97,4 +125,5 @@ async function main(): Promise<void> {
   }
 }
 
+// Run the example
 main().catch(console.error);

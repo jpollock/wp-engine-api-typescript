@@ -1,3 +1,29 @@
+/**
+ * Validation Example
+ * 
+ * This example demonstrates the SDK's input validation capabilities, showing how
+ * various types of invalid input are caught and handled before making API calls.
+ * 
+ * To run this example as a package user:
+ * 1. Install the package: npm install @elasticapi/wpengine-typescript-sdk
+ * 2. Create a new file with this content
+ * 3. Update the import to use '@elasticapi/wpengine-typescript-sdk'
+ * 4. Create a .env file with your credentials:
+ *    WPENGINE_USERNAME=your-username
+ *    WPENGINE_PASSWORD=your-password
+ * 5. Run with: npx ts-node your-file.ts
+ * 
+ * To run this example during local development:
+ * 1. Clone the repository
+ * 2. Run: npm install
+ * 3. Set up your .env file with credentials
+ * 4. Run: npm run example:validation
+ */
+
+// For package users:
+// import { WPEngineSDK, ValidationError } from '@elasticapi/wpengine-typescript-sdk';
+
+// For local development:
 import { WPEngineSDK, ValidationError } from '../src';
 
 async function demonstrateValidation(): Promise<void> {
